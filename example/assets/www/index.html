@@ -1,0 +1,496 @@
+<!DOCTYPE HTML>
+<html manifest="" lang="en-US">
+<head>
+   <title>PhoneGap / SAP Gateway</title>
+   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+   <meta name="apple-mobile-web-app-capable" content="yes" />
+<!-- <link rel="stylesheet" href="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.css" /> -->
+<link rel="stylesheet" href="css/jquery.mobile.structure-1.3.0.min.css" />
+
+<script type="text/javascript" src="cordova-2.3.0.js"></script>
+<script type="text/javascript" src="js/base64.js"></script> 
+<script type="text/javascript" src="js/barcodescanner.js"></script>
+<script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+<script src="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.js"></script>
+
+<!--<script src="js/jquery-1.9.1.min.js"></script>-->
+<!--<script src="js/jquery.mobile-1.3.0.min.js"></script>-->
+		
+<script> 
+ 
+   // Wait for Cordova to load
+    document.addEventListener("deviceready", onDeviceReady, false);
+
+	// Cordova is ready
+    function onDeviceReady(){
+	}
+	
+
+//************************************************************************
+//*  Construct a Basic Authentication header for the HTML request to GW  *
+//************************************************************************  
+	function makeBasicAuth(uname, pword){
+	   var tok = uname + ':' + pword;
+	   var hash = Base64.encode(tok);
+	   return "Basic " + hash;
+	}
+
+//**** GET ORDER 
+
+// Make a call to read the list of Flight-People from the ES Workplace
+	
+	function myOrder(orderid){
+
+    $.mobile.showPageLoadingMsg();
+
+
+// encode username and password in basica authentication
+	      //  var auth = makeBasicAuth(uname, pword);
+			var auth = makeBasicAuth('GW@ESW','ESW4GW');
+			
+			var req = new XMLHttpRequest();	
+			req.open("GET", "http://gw.esworkplace.sap.com/sap/opu/odata/sap/SALESORDERS/SOHeaders('"+orderid+"')/SOItems?$format=json", true);
+			req.setRequestHeader('Authorization', auth);
+			
+			req.onreadystatechange=function(){
+				if(req.readyState == 4 && (req.status==200)){
+					// get the type of response
+					var type = req.getResponseHeader("Content-Type");
+					if (type.indexOf("application/json") !== -1){
+									
+						var obj = JSON.parse(req.responseText);
+					//  	$("#users").children().remove();
+						 
+						for (var i = 0; i < obj.d.results.length; i++ ){	
+						
+						$('#order')
+    		      	.append('<li>Item: ' + obj.d.results[i].Description + ' (' + obj.d.results[i].Item + ') <br/>Quantity: ' + obj.d.results[i].Quantity + ' Price: $' + obj.d.results[i].Value + '</li>');
+					
+					$("#order").listview('refresh');
+		
+						}	
+						
+					} else {
+					    console.log("Type is: " + type); 
+				    	document.getElementById('airelement').innerHTML = "<textarea id='txArea' cols='63' rows='60'>" + req.responseText + "</textarea>";
+				    }
+				} else if(req.readyState === 4 && (req.status=401)){
+				    alert("No Access. Please check your internet connection.");
+				}
+			}
+			
+			// send the request now
+			req.send();
+			
+			 $.mobile.hidePageLoadingMsg();	
+			 
+			  window.location = '#six';
+				
+		}  // end getSkilledPersons		
+			
+	
+//************************************************************************                                            
+//*  Start get Persons                                                   *
+//************************************************************************	
+
+// Make a call to read the list of Flight-People from the ES Workplace
+	
+	function getPersons(){
+
+    $.mobile.showPageLoadingMsg();
+
+
+// encode username and password in basica authentication
+	      //  var auth = makeBasicAuth(uname, pword);
+			var auth = makeBasicAuth('GW@ESW','ESW4GW');
+			
+			var req = new XMLHttpRequest();	
+			req.open("GET", "http://gw.esworkplace.sap.com/sap/opu/odata/IWBEP/RMTSAMPLEFLIGHT_2/TravelAgencyCollection?$format=json", true);
+			req.setRequestHeader('Authorization', auth);
+			
+			req.onreadystatechange=function(){
+				if(req.readyState == 4 && (req.status==200)){
+					// get the type of response
+					var type = req.getResponseHeader("Content-Type");
+					if (type.indexOf("application/json") !== -1){
+									
+						var obj = JSON.parse(req.responseText);
+					//  	$("#users").children().remove();
+						 
+						for (var i = 0; i < obj.d.results.length; i++ ){	
+						
+						$('#users')
+    		      	.append('<li><a href="" onclick="getProfile(' + obj.d.results[i].TravelAgencyID + ')">' + obj.d.results[i].Name + ' (' + obj.d.results[i].TravelAgencyID + ')</a></li>');
+					
+					$("#users").listview('refresh');
+					
+						}	
+						
+					} else {
+					    console.log("Type is: " + type); 
+				    	document.getElementById('peopleElement').innerHTML = "<textarea id='txArea' cols='63' rows='60'>" + req.responseText + "</textarea>";
+				    }
+				} else if(req.readyState === 4 && (req.status=401)){
+				    alert("No Access. Please check your internet connection.");
+				}
+			}
+			
+			// send the request now
+			req.send();
+			
+			 $.mobile.hidePageLoadingMsg();	
+			 
+			  window.location = '#one';
+				
+		}  // end getSkilledPersons		
+		
+//************************************************************************                                            
+//*  Start get Airlines                                                   *
+//************************************************************************	
+
+// Make a call to read the list of Flight-People from the ES Workplace
+	
+	function getAirlines(){
+
+    $.mobile.showPageLoadingMsg();
+
+
+// encode username and password in basica authentication
+	      //  var auth = makeBasicAuth(uname, pword);
+			var auth = makeBasicAuth('GW@ESW','ESW4GW');
+			
+			var req = new XMLHttpRequest();	
+			req.open("GET", "http://gw.esworkplace.sap.com/sap/opu/odata/IWBEP/RMTSAMPLEFLIGHT_2/CarrierCollection?$format=json", true);
+			req.setRequestHeader('Authorization', auth);
+			
+			req.onreadystatechange=function(){
+				if(req.readyState == 4 && (req.status==200)){
+					// get the type of response
+					var type = req.getResponseHeader("Content-Type");
+					if (type.indexOf("application/json") !== -1){
+									
+						var obj = JSON.parse(req.responseText);
+					  	$("#users").children().remove();
+						 
+						for (var i = 0; i < obj.d.results.length; i++ ){	
+						
+						$('#airlines')
+    		      	.append('<li><a href="'+ obj.d.results[i].URL +'">' + obj.d.results[i].AirLineName + ' (' + obj.d.results[i].AirLineID + ')' + ' </a></li>');
+					
+					$("#airlines").listview('refresh');
+		
+						}	
+						
+					} else {
+					    console.log("Type is: " + type); 
+				    	document.getElementById('airelement').innerHTML = "<textarea id='txArea' cols='63' rows='60'>" + req.responseText + "</textarea>";
+				    }
+				} else if(req.readyState === 4 && (req.status=401)){
+				    alert("No Access. Please check your internet connection.");
+				}
+			}
+			
+			// send the request now
+			req.send();
+			
+			 $.mobile.hidePageLoadingMsg();	
+			 
+			  window.location = '#five';
+				
+		}  // end getSkilledPersons		
+		
+
+
+//************************************************************************                                            
+//*  end get airlines                                                    *
+//************************************************************************	
+
+
+	// Make a call to read the list of People from Gateway
+	function getProfile(agent){
+
+//	$("#three").trigger("pagecreate");
+    $.mobile.showPageLoadingMsg();
+    
+// Reset all values  
+//	 document.getElementById('name').value = '';
+//	 document.getElementById('agencyid').value = '';
+//	 document.getElementById('street').value = '';
+//	 document.getElementById('city').value = '';
+//	 document.getElementById('region').value = '';
+//	 document.getElementById('phone').value = '';
+//	 document.getElementById('url').value = '';
+ 
+
+// encode username and password in basica authentication
+    	    var auth = makeBasicAuth('GW@ESW','ESW4GW');
+    	     
+			var req = new XMLHttpRequest();
+			req.open("GET", "http://GW.ESWORKPLACE.SAP.COM:80/sap/opu/odata/IWBEP/RMTSAMPLEFLIGHT_2/TravelAgencyCollection('"+agent+"')?$format=json", true);
+			req.setRequestHeader('Authorization', auth);
+
+			req.onreadystatechange=function(){
+				if(req.readyState == 4 && (req.status==200)){
+					// get the type of response
+					var type = req.getResponseHeader("Content-Type");
+					if (type.indexOf("application/json") !== -1){
+
+				   var object = JSON.parse(req.responseText);
+	 
+	 document.getElementById('name').value = object.d.Name;
+	 document.getElementById('agencyid').value = object.d.TravelAgencyID;
+	 document.getElementById('street').value = object.d.Street;
+	 document.getElementById('city').value = object.d.City;
+	 document.getElementById('region').value = object.d.Region;
+	 document.getElementById('phone').value = object.d.TelephoneNumber;
+	 document.getElementById('url').value = object.d.URL;
+		
+							} else {
+					    console.log("Type is: " + type); 
+				    	document.getElementById('airelement').innerHTML = "<textarea id='txArea' cols='63' rows='60'>" + req.responseText + "</textarea>";
+				    }
+				} else if(req.readyState === 4 && (req.status=401)){
+				    alert("Hmm, no results for this Agency. Please try Happy Hopping, Pink Panther, or Kangeroos.");
+				}
+			}		   
+
+
+
+	 	// !important! - refresh input fields		
+	    //		 div.find('div[data-role="fieldcontain"]').fieldcontain();
+      	//		 div.find('input,textarea').textinput();
+      			 
+      			 
+			// send the request now
+			req.send();
+
+			 $.mobile.hidePageLoadingMsg();			
+
+	        window.location = '#three';
+
+		}   
+
+
+//************************************************************************
+//*  End addContact                                                      *
+//*  Start BarcodeScanner Function - ScanIt                              *
+//************************************************************************	
+
+function scanOrder() {
+
+	window.plugins.barcodeScanner.scan( function(result) {    	
+        	myOrder(result.text);
+    	}, function(error) {
+        	alert("Scanning failed: " + error);
+    	}
+	);
+	
+} // end scanIt
+
+
+
+</script>
+     </head>
+        <body>
+ 
+<!--********************************************************************-->
+<!--*  Create jQuery Mobile Index Page                                  -->
+<!--********************************************************************-->  
+  <!-- Start of index page: #index -->
+<div data-role="page" id="index" data-theme="b" data-add-back-btn="true">
+
+	<div data-role="header" data-theme="b">
+		<h1>Demo</h1>
+	</div><!-- /header -->
+
+		<div data-role="content" data-theme="b">	
+
+<ul data-role="listview" data-ajax="false" data-inset="true" data-theme="d">
+    <li data-role="list-divider">Give it a try!</li>
+    <li><a href="" onclick="scanOrder()">Scan Sales Order</a></li>
+    <li><a href="" onclick="getAirlines()">View Airlines</a></li>
+    <li><a href="" onclick="getPersons()">View Travel Agencies</a></li>
+    <li><a href="#about">About this App</a></li>
+    <li><a href="#about2">About hyperCision Inc.</a></li>
+</ul>
+
+<!-- <p><label for="username" class="ui-hidden-accessible">User: </label>
+	<input type="text" name="sapUser" id="sapUser" placeholder="Username"></p>
+<p><label for="basic" class="ui-hidden-accessible">Password: </label>
+	<input type="password" name="sapPassword" id="sapPassword" placeholder="Password"></p>
+<input type="button" data-theme="b" value="Submit" onClick="getPersons(sapUser.value, sapPassword.value)" /><br/> -->
+
+
+<br/>
+		
+		</div><!-- /content -->
+			
+			<div data-role="footer" data-position="fixed">
+				<h3>powered by SAP Gateway and PhoneGap</h3>
+			</div><!-- /footer -->
+	
+	</div><!-- /page index -->  
+ 
+<!--********************************************************************-->
+<!--*  Create jQuery Mobile Page one                                    -->
+<!--********************************************************************-->  
+      <div data-role="page" data-theme="b" data-add-back-btn="false" id="one">
+            <div data-role="header" data-theme="b">
+            <a href="#index" data-icon="arrow-l">back</a>
+                <h1>Travel Agencies</h1>
+            </div>
+            
+            <div data-role="content" data-theme="b">
+  	        	<div class="content-primary">
+    
+  			 <ul data-role="listview" data-filter="true" data-filter-theme="c" data-theme="c" data-dividertheme="b" id="users">
+			 
+			 </ul>
+			<br/> 
+   <p><a href="#index" data-transition="slide" data-direction="reverse" data-role="button" data-theme="b">Index</a></p>	
+		           
+     </div>
+       </div>
+    	<div data-role="footer" data-position="fixed">
+		<h3>powered by SAP Gateway and PhoneGap</h3>
+		</div><!-- /footer --> 
+</div><!-- /page one -->
+
+<!--********************************************************************-->
+<!--*  Create jQuery Mobile Page three                                  -->
+<!--********************************************************************-->  
+<div data-role="page" id="three" data-theme="d" data-add-back-btn="true">
+
+	<div data-role="header" data-theme="d">
+	<a href="#one" data-direction="reverse" data-icon="arrow-l">back</a>
+		<h1>Agency Info</h1>
+	</div><!-- /header -->
+
+	<div data-role="content" data-theme="d">	
+
+		<div data-role="fieldcontain">
+	    <label>Name: </label><input type="text" value="" id="name"><br/>
+	    <label>ID: </label><input type="text" value="" id="agencyid"><br/> 
+		<label>Street: </label><input type="text" value="" id="street"><br/>
+		<label>City: </label><input type="text" value="" id="city"><br/>
+		<label>State: </label><input type="text" value="" id="region"><br/>
+		<label>Phone: </label><input type="text" value="" id="phone"><br/>
+		<label>URL: </label><input type="text" value="" id="url"><br/>
+		</div> <!-- end fieldcontain -->
+
+	<!--	<p><a href="" onclick="addContact()" data-role="button" data-theme="d">Add to Contacts</a></p>	-->
+		<p><a href="#one" data-transition="slide" data-direction="reverse" data-role="button" data-theme="d">Back</a></p>	
+
+	</div><!-- /content -->
+
+	<div data-role="footer" data-position="fixed">
+		<h3>powered by SAP Gateway and PhoneGap</h3>
+	</div><!-- /footer -->
+
+</div><!-- /page three -->
+<!--********************************************************************-->
+<!--*  Create jQuery Mobile Page five                                    -->
+<!--********************************************************************-->  
+      <div data-role="page" data-theme="b" data-add-back-btn="false" id="five">
+            <div data-role="header" data-theme="b">
+            <a href="#index" data-icon="arrow-l">back</a>
+                <h1>Airlines</h1>
+            </div>
+            
+            <div data-role="content" data-theme="b">
+  	        	<div class="content-primary">
+    
+  			 <ul data-role="listview" data-filter="true" data-filter-theme="c" data-theme="c" data-dividertheme="b" id="airlines">
+			 
+			 </ul>
+			<br/> 
+   <p><a href="#index" data-transition="slide" data-direction="reverse" data-role="button" data-theme="b">Index</a></p>	
+		           
+     </div>
+       </div>
+    	<div data-role="footer" data-position="fixed">
+		<h3>powered by SAP Gateway and PhoneGap</h3>
+		</div><!-- /footer --> 
+</div><!-- /page five -->
+
+<!--********************************************************************-->
+<!--*  Create jQuery Mobile Page about                                  -->
+<!--********************************************************************-->  
+      <div data-role="page" data-theme="b" data-add-back-btn="false" id="about">
+            <div data-role="header" data-theme="b">
+            <a href="#index" data-icon="arrow-l">back</a>
+                <h1>About this App</h1>
+            </div>
+            
+            <div data-role="content" data-theme="b">
+  	        	<div class="content-primary">
+    
+	This app was created using Netweaver Gateway Demo services (hosted by SAP), Adobe PhoneGap and jQueryMobile. 
+	Please feel free to contact bwebb@hypercision.com if you have any questions about these technologies. <br/><br/>
+        
+    
+    <a href="http://scn.sap.com/docs/DOC-31221?rid=/webcontent/uuid/1051f6d9-e87a-2e10-d188-e2786c7878b1" data-role="button">
+    Demo Gateway Services (SCN)</a><br/><br/>
+    
+    <a href="http://hypercision.com/pages/mobility-rapid-enablement-services" data-role="button" data-role="button">
+    hyperCision Mobile Info</a>
+    
+     </div>
+       </div>
+    	<div data-role="footer" data-position="fixed">
+		<h3>powered by SAP Gateway and PhoneGap</h3>
+		</div><!-- /footer --> 
+</div><!-- /page one -->
+
+<!--********************************************************************-->
+<!--*  Create jQuery Mobile Page about                                  -->
+<!--********************************************************************-->  
+      <div data-role="page" data-theme="b" data-add-back-btn="false" id="about2">
+            <div data-role="header" data-theme="b">
+            <a href="#index" data-icon="arrow-l">back</a>
+                <h1>Who We Are</h1>
+            </div>
+            
+            <div data-role="content" data-theme="b">
+  	        	<div class="content-primary">
+    
+    hyperCision Inc is a SAP and SuccessFactors partner. We provide expertise in deploying enterprise-level applications for our clients. For more information or a discussion regarding how to kickstart your SAP mobility efforts within a few weeks, contact us at info@hypercision.com
+
+ <br/><br/>
+    <a data-role="button" href="http://hypercision.com/pages/mobility-rapid-enablement-services">
+    hyperCision Mobile Info</a>        
+    
+     </div>
+       </div>
+    	<div data-role="footer" data-position="fixed">
+		<h3>powered by SAP Gateway and PhoneGap</h3>
+		</div><!-- /footer --> 
+</div><!-- /page one -->
+
+<!--********************************************************************-->
+<!--*  Create jQuery Mobile Page Six                                    -->
+<!--********************************************************************-->  
+      <div data-role="page" data-theme="d" data-add-back-btn="false" id="six">
+            <div data-role="header" data-theme="d">
+            <a href="#index" data-direction="reverse" data-icon="arrow-l">back</a>
+                <h1>Order</h1>
+            </div>
+            
+            <div data-role="content">
+  	        	<div class="content-primary">
+    
+  			 <ul data-role="listview" data-theme="b" data-dividertheme="d" id="order">
+			 
+			 </ul>
+			<br/> 
+			 <p><a href="#one" data-transition="slide" data-direction="reverse" data-role="button" data-theme="d">Home</a></p>	
+    		           
+     </div>
+       </div>
+    	<div data-role="footer" data-position="fixed">
+		<h3>powered by SAP Gateway and PhoneGap</h3>
+		</div><!-- /footer --> 
+</div><!-- /page six
+    </body>
+</html>
+
