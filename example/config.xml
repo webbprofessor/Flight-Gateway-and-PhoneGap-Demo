@@ -1,0 +1,19 @@
+<!-- phonegap build config.xml syntax -->
+<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns     = "http://www.w3.org/ns/widgets"
+    xmlns:gap = "http://phonegap.com/ns/1.0"
+    id        = "com.phonegap.hyperCision"
+    version   = "1.0.0">
+    <name>Flights Demo (NWG+PG)</name>
+    
+    <description>
+        Flight & Sales Order Demo using SAP Netweaver Gateway and Adobe PhoneGap
+    </description>
+    <!-- more info here-->
+    <gap:plugin name="BarcodeScanner" /> <!-- use latest release by default -->
+	
+	  <author href="http://twitter.com/gbwebb" email="bwebb@hypercision.com">
+        Brandon Webb
+    </author>
+    
+</widget>
